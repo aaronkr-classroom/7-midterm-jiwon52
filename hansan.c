@@ -8,6 +8,8 @@
 #define CMD_CRANE_FORM	0x10 // Bit 4 - 학익진 유지	0001 0000
 #define CMD_EVAC		0x20 // Bit 5 - 부상병 후송	0010 0000
 #define CMD_DAMAGE		0x40 // Bit 6 - 피해 경고	0100 0000
+#define DAMAGE_VALUE	-10
+#define HEAL_VALUE		+5
 
 // Toggle 명령 ON
 unsigned char CommandOn(unsigned char fleet, unsigned char bit) {
@@ -60,10 +62,11 @@ void printMenu(void) {
 int main(void) {
 	unsigned char fleet = 0;
 	int choice;
+	int hp = 100; // 생명 점수 초기화
 
 	while (1) {
-		printMenu(); // 나중에
-		scanf_s("%d", &choice);
+		printMenu();
+		scanf()("%d", &choice);
 
 		switch (choice) {
 		case 1:
@@ -76,47 +79,8 @@ int main(void) {
 				printf("전 함선, 표를 장전하라!\n");
 			}
 			break;
-		case 2:
-			if (fleet & CMD_FIRE) {
-				fleet = CommandOff(fleet, 1);
-				printf("발포 중지! 포신 내린다!\n");
-			}
-			else {
-				fleet = CommandOn(fleet, 1);
-				printf("발포 하라! 적을 향해 쏴라!\n");
-			}
-			break;
-		case 3:
-			if (fleet & CMD_CHARGE) {
-				fleet = CommandOff(fleet, 2);
-				printf("돌격 중지!\n");
-			}
-			else {
-				fleet = CommandOn(fleet, 2);
-				printf("전 함선 돌격 전진 개시!\n");
-			}
-			break;
-		case 4:
-			if (fleet & CMD_HOLD) {
-				fleet = CommandOff(fleet, 3);
-				printf("후퇴 명령 해제!\n");
-			}
-			else {
-				fleet = CommandOn(fleet, 3);
-				printf("후퇴 준비, 적 움직임 감시!\n");
-			}
-			break;
-		case 5:
-			if (fleet & CMD_CRANE_FORM) {
-				fleet = CommandOff(fleet, 4);
-				printf("학익진 진형 해제!\n");
-			}
-			else {
-				fleet = CommandOn(fleet, 4);
-				printf("학익진 진형 유지!\n");
-			}
-			break;
-		case 6:
+
+		case 6: // 부상병 후송
 			if (fleet & CMD_EVAC) {
 				fleet = CommandOff(fleet, 5);
 				printf("부상병 후송 중지!\n");
@@ -124,9 +88,12 @@ int main(void) {
 			else {
 				fleet = CommandOn(fleet, 5);
 				printf("부상병 후송 시작!\n");
+				hp += 5;
+				if (hp > 100) hp = 100;
 			}
 			break;
-		case 7:
+
+		case 7: // 피해 경고
 			if (fleet & CMD_DAMAGE) {
 				fleet = CommandOff(fleet, 6);
 				printf("피해 경고 해제!\n");
@@ -134,29 +101,27 @@ int main(void) {
 			else {
 				fleet = CommandOn(fleet, 6);
 				printf("함선 피해 발생 경고!\n");
+				hp -= 10;
 			}
 			break;
-		case 8:
-			fleet = 0;
-			printf("모든 함선 상태 초기화 완료!\n");
-			break;
-		case 9:
-			printf("총무공 점검: 현재 모든 함선 상태 확인!\n");
-			break;
-		case 10:
-			fleet = 0x7F; // 모든 비트 ON
-			printf("전면 돌격 모드! 모든 명령 활성!\n");
-			break;
+
 		case 11:
-			printf("프로르램 종료햅니다.\n");
+			printf("프로그램 종료합니다.\n");
 			return 0;
+
 		default:
-			printf("잘못됭 입력입니다! (1~11)선택!\n");
-		} // switch()
+			printf("기타 명령 수행 중...\n");
+		}
 
 		showStatus(fleet);
+		printf("현재 HP: %d\n", hp);
 
-	} // while()
-
+		if (hp <= 0) {
+			printf("You are dead. Game Over\n");
+			break;
+		}
+	}
 	return 0;
 }
+
+
